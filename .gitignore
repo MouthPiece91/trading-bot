@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+# market data, results, logs and secrets stay on your machine
+data/
+reports/
+logs/
+STOP
+.env

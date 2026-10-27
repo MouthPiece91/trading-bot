@@ -1,0 +1,60 @@
+# Trading bot settings. Every rule in STRATEGY.md has its number here.
+# Change ONE thing at a time and re-run the backtest.
+
+starting_balance: 10000        # backtest only; live uses your MT5 equity
+
+strategy:
+  swing_len_htf: 3             # bars each side of a higher-timeframe swing
+  swing_len_ltf: 2
+  zone_depth: 0.5              # Felix's rule: price must trade 50% into the zone
+  zone_max_age: 120            # HTF bars a zone stays valid
+  use_order_blocks: true
+  use_fvgs: true
+  require_sweep: true          # a liquidity sweep must happen before the trigger
+  sweep_lookback: 12           # LTF bars
+  patterns: [pin_bar, engulfing, inside_bar_false_breakout, morning_star, evening_star,
+             tweezer_bottom, tweezer_top, dragonfly_doji, gravestone_doji]
+  min_confluence: 0            # extra points needed (sweep, fib 50-61.8, EMA21, session)
+  use_sessions: true
+  server_utc_offset: 2         # your broker's server time minus UTC (often 2 or 3)
+  entry_mode: confirm_close    # confirm_close | confirm_50 | zone_limit
+  limit_expiry: 6              # LTF bars a limit order waits
+  sl_buffer_atr: 0.1
+  min_rr: 2.0                  # book: never take less than 2:1
+  tp_mode: nearest             # nearest | first_meeting_rr
+
+management:
+  mode: breakeven_partial      # none | breakeven | breakeven_partial | trail
+  be_trigger: 0.6              # at 60% of the way to TP...
+  partial_pct: 0.25            # ...move stop to break-even (+costs) and close 25%
+  trail_atr: 1.0
+
+risk:
+  account_type: personal       # personal | prop
+  risk_pct: 1.0                # personal 1-2%, prop 0.5-1%
+  max_risk_pct: 3.0            # hard cap; the code refuses more than 3%
+  daily_loss_pct: 4.0          # prop: set below the firm's daily limit
+  max_drawdown_pct: 8.0        # prop: set below the firm's max loss
+  drawdown_reference: initial  # initial | peak (match your prop firm's rule)
+  max_trades_per_day: 3
+  max_consecutive_losses: 3    # pause for the rest of the day
+  initial_balance: 0           # prop: the challenge's starting balance; 0 = equity when the bot starts
+
+# Contract details. These are TYPICAL values. Replace each with the output of
+#   tradebot specs --symbol <NAME>
+# because brokers differ (and symbol names can have suffixes like XAUUSD.m).
+symbols:
+  EURUSD: {contract_size: 100000, point: 0.00001, conversion: direct, default_spread_points: 10}
+  GBPUSD: {contract_size: 100000, point: 0.00001, conversion: direct, default_spread_points: 12}
+  USDJPY: {contract_size: 100000, point: 0.001, conversion: divide_by_price, default_spread_points: 12}
+  XAUUSD: {contract_size: 100, point: 0.01, conversion: direct, default_spread_points: 25}
+  US30:   {contract_size: 1, point: 0.01, conversion: direct, default_spread_points: 200}
+  NAS100: {contract_size: 1, point: 0.01, conversion: direct, default_spread_points: 150}
+  "Volatility 75 Index": {contract_size: 1, point: 0.0001, conversion: direct, volume_min: 0.001,
+                          volume_step: 0.001, default_spread_points: 2000, sessions: false}
+
+# Live / paper trading. Start with: tradebot live   (dry run, no orders)
+live_targets:
+  - {symbol: XAUUSD, pair: H1-M5}
+  - {symbol: EURUSD, pair: H4-M15}
+allow_real_account: false      # keep false until DEMO results match the backtest
